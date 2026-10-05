@@ -33,7 +33,7 @@ function median(values){const sorted=(Array.isArray(values)?values:[]).map(Numbe
 /* Import validation: allow-listed types, string ids, numeric coordinates, and
    every config value coerced to a string so execute() can never call a method
    on a non-string. */
-function normalizeNodes(nodes,limit){const max=limit||MAX_NODES;if(!Array.isArray(nodes)||nodes.length>max)throw new Error('Invalid graph');return nodes.filter(n=>n&&isType(n.type)&&typeof n.id==='string'&&n.id.trim()).map(n=>{const src=n.config&&typeof n.config==='object'&&!Array.isArray(n.config)?n.config:{};const config={};for(const key of Object.keys(src)){const v=src[key];config[key]=v==null?'':typeof v==='string'?v:String(v)}return{id:n.id,type:n.type,name:typeof n.name==='string'&&n.name?n.name:n.type,x:Number(n.x)||0,y:Number(n.y)||0,config}})}
+function normalizeNodes(nodes,limit){const max=limit||MAX_NODES;if(!Array.isArray(nodes)||nodes.length>max)throw new Error('Invalid graph');const seen=new Set();return nodes.filter(n=>{if(!(n&&isType(n.type)&&typeof n.id==='string'&&n.id.trim()))return false;if(seen.has(n.id))return false;seen.add(n.id);return true}).map(n=>{const src=n.config&&typeof n.config==='object'&&!Array.isArray(n.config)?n.config:{};const config={};for(const key of Object.keys(src)){const v=src[key];config[key]=v==null?'':typeof v==='string'?v:String(v)}return{id:n.id,type:n.type,name:typeof n.name==='string'&&n.name?n.name:n.type,x:Number(n.x)||0,y:Number(n.y)||0,config}})}
 /* Retriever nodes produce the {{context}} for Prompt nodes. Their selections are
    resolved before the walk, so a retriever placed to the right of the prompt
    still feeds it. A graph with retriever nodes uses their (possibly empty)

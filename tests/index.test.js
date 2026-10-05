@@ -136,6 +136,16 @@ test('normalizeNodes drops disallowed types and id-less nodes, and rejects overs
   assert.throws(()=>core.normalizeNodes(null),/Invalid graph/);
 });
 
+test('normalizeNodes keeps only the first node for a duplicated id',()=>{
+  const nodes=core.normalizeNodes([
+    {id:'dup',type:'input',config:{text:'first'}},
+    {id:'dup',type:'output',config:{prefix:'second'}}
+  ]);
+  assert.strictEqual(nodes.length,1,'a duplicated id must not yield two nodes');
+  assert.strictEqual(nodes[0].config.text,'first','the first occurrence wins');
+  assert.strictEqual(core.runWorkflow(nodes,NOTES).error,null,'the graph still runs');
+});
+
 test('node order follows the x coordinate',()=>{
   const ordered=core.orderNodes([{id:'b',x:20},{id:'a',x:10}]);
   assert.deepStrictEqual(ordered.map(n=>n.id),['a','b']);
