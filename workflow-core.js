@@ -21,7 +21,14 @@ function orderNodes(nodes){return (Array.isArray(nodes)?[...nodes]:[]).sort((a,b
 function interpolate(template,input,context){const inText=String(input==null?'':input),ctxText=String(context==null?'':context);return String(template==null?'':template).replace(/{{(input|context)}}/g,(m,key)=>key==='input'?inText:ctxText)}
 /* Sentences from the notes panel whose text contains the lookup phrase.
    Matching is case-insensitive; an empty phrase matches nothing. */
-function selectContext(notes,query){const words=String(query==null?'':query).toLowerCase().split(/\W+/).filter(Boolean);if(!words.length)return '';return String(notes==null?'':notes).split(/[.!?]+/).map(s=>s.trim()).filter(Boolean).filter(s=>words.some(w=>s.toLowerCase().includes(w))).join('. ')}
+function selectContext(notes,query){
+  const terms=String(query==null?'':query).normalize('NFC').toLowerCase().match(/[\p{L}\p{M}\p{N}_]+/gu);
+  if(!terms)return '';
+  return String(notes==null?'':notes).split(/[.!?。！？]+/).map(sentence=>sentence.trim()).filter(sentence=>{
+    const text=sentence.normalize('NFC').toLowerCase();
+    return terms.some(term=>text.includes(term));
+  }).join('. ');
+}
 function applyTransform(value,operation){const text=String(value==null?'':value);if(operation==='uppercase')return text.toUpperCase();if(operation==='json')return JSON.stringify({text:text,length:text.length});return text.split(/(?<=[.!?])\s+/).slice(0,2).join(' ')}
 function applyTool(value,operation,now){const text=String(value==null?'':value);if(operation==='timestamp'){const at=now instanceof Date?now:new Date(now==null?Date.now():now);return text+' @ '+at.toISOString()}return text+' [words='+text.trim().split(/\s+/).filter(Boolean).length+']'}
 /* An evaluator with no expected phrase cannot verify anything, so it fails. */
