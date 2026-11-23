@@ -22,6 +22,14 @@ test('selectContext matches case-insensitively, splits on any term, and ignores 
   assert.strictEqual(core.selectContext(NOTES,'provider orphan-words'),'Provider keys are never transmitted','any term in the phrase is enough');
 });
 
+test('retriever selects relevant sentences for Unicode lookup terms',()=>{
+  const notes='缓存保存在本地。引用可以追溯来源！运行会生成日志？';
+  assert.strictEqual(core.selectContext(notes,'引用'),'引用可以追溯来源');
+  assert.strictEqual(core.selectContext('A plain cafe. The café is open.','café'),'The café is open');
+  assert.strictEqual(core.selectContext('First. Тест работает!','ТЕСТ'),'Тест работает');
+  assert.strictEqual(core.selectContext(notes,'。！？'),'');
+});
+
 test('interpolate fills {{input}} and {{context}}',()=>{
   const out=core.interpolate('A {{input}} B {{context}} C','IN','CTX');
   assert.strictEqual(out,'A IN B CTX C');
